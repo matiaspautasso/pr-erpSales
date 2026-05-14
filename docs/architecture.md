@@ -83,6 +83,37 @@ Tres servicios independientes en Railway. Comunicación via HTTP REST. Auth via 
 
 ---
 
+### AD-08: Recuperación de contraseña vía Google SMTP
+
+**Elegido:** Nodemailer con transporte Google SMTP (OAuth2 o App Password) para enviar emails de reseteo de contraseña con token temporal almacenado en base de datos.
+
+**Alternativas rechazadas:** SendGrid / Resend (servicios de terceros pagos innecesarios para volumen mínimo), SMTP propio (requiere infraestructura adicional), sin recuperación de contraseña (inaceptable en producción).
+
+**Rationale:** Sistema de un único usuario con cuenta de Google. Usar Google SMTP es costo cero, configuración mínima, y confiable. El token de reseteo se persiste en la tabla `password_reset_tokens` con expiración de 1 hora y se invalida al ser usado.
+
+**Variables de entorno requeridas:**
+```
+GOOGLE_SMTP_USER=cuenta@gmail.com
+GOOGLE_SMTP_APP_PASSWORD=xxxx xxxx xxxx xxxx   # App Password de Google
+```
+
+**Decisión documentada:** No se usa OAuth2 SMTP (requiere refresh token y flujo de autorización más complejo). Se usa App Password — más simple para un sistema interno con un solo remitente fijo.
+
+---
+
+### AD-09: Sin integración fiscal, gateway de pagos ni dispositivos externos
+
+**Elegido:** El sistema no integra AFIP, Mercado Pago, balanza comercial, lectores de código de barras ni impresoras fiscales en esta versión.
+
+**Rationale:**
+- **Fiscal:** el negocio opera con ticket interno no fiscal. AFIP requiere homologación de controlador fiscal — fuera del alcance MVP.
+- **Mercado Pago:** los pagos con débito/crédito se procesan por la terminal del banco. El sistema solo registra el medio de pago, no procesa el cobro.
+- **Dispositivos:** la balanza es física y manual. Integrarla requiere driver/protocolo serial por modelo — complejidad injustificada para el volumen del negocio.
+
+**Consecuencia:** los medios de pago digitales (débito, crédito, transferencia) son registros manuales del dueño, no transacciones procesadas por el sistema.
+
+---
+
 ### AD-07: Railway con Nixpacks y Root Directory por servicio
 
 **Elegido:** Nixpacks (autodetección) con Root Directory `backend/` y `frontend/` en cada servicio Railway. Release command en backend: `npm run migration:run`.

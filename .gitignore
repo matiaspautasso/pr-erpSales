@@ -35,3 +35,7 @@ Thumbs.db
 
 # TypeORM
 # Las migrations sí se versiona (no ignorar backend/src/database/migrations/)
+.env.backend
+.env.frontend
+backend/.env.backend
+frontend/.env.frontend

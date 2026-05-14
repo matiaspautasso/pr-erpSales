@@ -2,6 +2,14 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '../shared/auth/ProtectedRoute';
 import { MainLayout } from './layouts/MainLayout';
 import { HealthPage } from '../features/health/HealthPage';
+import { LoginPage } from '../features/auth/LoginPage';
+import { ForgotPasswordPage } from '../features/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '../features/auth/ResetPasswordPage';
+import { ProductsPage } from '../features/productos/ProductsPage';
+import { DashboardPage } from '../features/dashboard/DashboardPage';
+import { ComprasPage } from '../features/compras/ComprasPage';
+import { CajaPage } from '../features/caja/CajaPage';
+import { POSPage } from '../features/ventas/POSPage';
 
 export const router = createBrowserRouter([
   {
@@ -10,13 +18,15 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-text-secondary font-body">
-          Login — implementado en el change <code>auth</code>
-        </p>
-      </div>
-    ),
+    element: <LoginPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
   {
     path: '/',
@@ -29,6 +39,26 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <Navigate to="/dashboard" replace />,
+      },
+      {
+        path: 'dashboard',
+        element: <DashboardPage />,
+      },
+      {
+        path: 'productos',
+        element: <ProductsPage />,
+      },
+      {
+        path: 'compras',
+        element: <ComprasPage />,
+      },
+      {
+        path: 'ventas',
+        element: <POSPage />,
+      },
+      {
+        path: 'caja',
+        element: <CajaPage />,
       },
     ],
   },

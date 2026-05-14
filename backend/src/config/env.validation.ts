@@ -11,6 +11,8 @@ const envSchema = z.object({
     .min(32, 'JWT_SECRET debe tener al menos 32 caracteres'),
   JWT_EXPIRES_IN: z.string().default('8h'),
   CORS_ORIGIN: z.string().url('CORS_ORIGIN debe ser una URL válida').default('http://localhost:5173'),
+  GOOGLE_SMTP_USER: z.string().email('GOOGLE_SMTP_USER debe ser un email válido'),
+  GOOGLE_SMTP_APP_PASSWORD: z.string().min(1, 'GOOGLE_SMTP_APP_PASSWORD es requerido'),
 });
 
 export type Env = z.infer<typeof envSchema>;

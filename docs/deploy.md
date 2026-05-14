@@ -12,6 +12,8 @@
 | `JWT_SECRET` | *(generado)* | Mínimo 32 chars. **NUNCA commitear.** |
 | `JWT_EXPIRES_IN` | `8h` | Tiempo de vida del token |
 | `CORS_ORIGIN` | `https://polleria-front.up.railway.app` | Dominio público del frontend |
+| `GOOGLE_SMTP_USER` | `tucuenta@gmail.com` | Cuenta Gmail remitente de emails de recupero |
+| `GOOGLE_SMTP_APP_PASSWORD` | `xxxx xxxx xxxx xxxx` | App Password de Google. **NUNCA commitear.** |
 
 **Generar JWT_SECRET:**
 ```bash
@@ -36,6 +38,8 @@ DATABASE_URL=postgresql://polleria:polleria_dev@localhost:5432/polleria_db
 JWT_SECRET=<min-32-chars-secret-for-local-dev-only>
 JWT_EXPIRES_IN=8h
 CORS_ORIGIN=http://localhost:5173
+GOOGLE_SMTP_USER=tucuenta@gmail.com
+GOOGLE_SMTP_APP_PASSWORD=xxxx xxxx xxxx xxxx
 ```
 
 Crear `frontend/.env` (no se commitea):
@@ -108,6 +112,13 @@ Verificar que `CORS_ORIGIN` en el backend apunta **exactamente** al dominio del 
 
 - Verificar que `JWT_SECRET` es el mismo en todos los deployments (no regenerar entre deploys).
 - Verificar que `JWT_EXPIRES_IN` no es demasiado corto.
+
+### Email de recupero no llega
+
+- Verificar que `GOOGLE_SMTP_USER` y `GOOGLE_SMTP_APP_PASSWORD` están correctamente seteados en Railway.
+- La App Password se genera en: Google Account → Seguridad → Verificación en 2 pasos → Contraseñas de aplicaciones.
+- Gmail puede bloquear el envío si la cuenta no tiene verificación en 2 pasos activa — es requisito para App Passwords.
+- Revisar la carpeta de spam del destinatario.
 
 ### Frontend no puede conectar al backend
 

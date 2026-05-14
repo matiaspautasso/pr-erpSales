@@ -1,0 +1,34 @@
+schema: spec-driven
+
+context: |
+  Stack: NestJS 10 + TypeORM (PostgreSQL, synchronize:false) + React 18 + Vite + TypeScript + Tailwind CSS
+  Architecture: module-per-domain (NestJS), feature-first (React). Page → View → Hook pattern.
+  Auth: JWT global guard (APP_GUARD), @Public() para endpoints públicos.
+  Testing: Jest (backend, 46 tests), Vitest (frontend, 21 tests). Strict TDD mode.
+  Design: bg #EAF4FF, primary #2563EB, title #1E3A8A, Sora (heading) + Lexend (body).
+  Constraint: máximo 50 productos activos en el sistema.
+  No fiscal/AFIP, no Mercado Pago, no dispositivos externos.
+
+strict_tdd: true
+
+rules:
+  proposal:
+    - Incluir módulo(s) afectado y justificación de la necesidad
+    - Identificar dependencias entre módulos (ej: ventas depende de caja)
+  specs:
+    - Usar formato Given/When/Then para escenarios
+    - Usar RFC 2119 (MUST, SHALL, SHOULD, MAY)
+    - Incluir casos happy path Y sad path por feature
+  design:
+    - Leer código existente antes de diseñar — nunca asumir
+    - Documentar decisiones con alternativas consideradas
+    - TypeORM DECIMAL retorna string desde DB — siempre Number() en aritmética
+  tasks:
+    - Agrupar por fase (infra, implementación, testing)
+    - Numeración jerárquica: 1.1, 1.2, etc.
+  apply:
+    - Seguir patrones existentes del proyecto
+    - RED primero, confirmar falla, luego GREEN
+  verify:
+    - Comparar implementación contra cada escenario del spec
+    - Correr suite completa antes de reportar done

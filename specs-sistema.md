@@ -17,7 +17,7 @@
 ### Ventas
 **Incluido:**
 - Ventas anónimas por mostrador al consumidor final
-- Productos vendidos **exclusivamente por kilogramo**
+- Productos vendidos **por kilogramo o por unidad**, según la configuración del producto
 - Pago en el momento de la venta
 - Un único medio de pago por venta (efectivo, transferencia o tarjeta)
 - Descuento porcentual opcional sobre el total de la venta
@@ -31,7 +31,7 @@
 - Mayoristas
 - Facturación fiscal / AFIP
 - Combinación de múltiples medios de pago en una misma venta
-- Modificación de precio por kg al momento de la venta
+- Modificación de precio al momento de la venta (ni por kg ni por unidad)
 
 ---
 
@@ -39,19 +39,27 @@
 
 La pollería usa balanza física, pero el sistema **no se integra** con ella.
 
-**Operatoria:** el dueño pesa el producto en la balanza y carga el peso manualmente.
+**Aplica solo a productos vendidos por kg.** Los productos por unidad no requieren balanza.
+
+**Operatoria:** el dueño pesa el producto en la balanza y carga el peso manualmente en el sistema.
 
 **Ejemplo:**
 ```
-Producto: Pechuga
+Producto: Pechuga (por kg)
 Peso: 1.250 kg
 Precio por kg: $4.500
 Subtotal: $5.625
+
+Producto: Pollo entero (por unidad)
+Cantidad: 2 unidades
+Precio por unidad: $8.000
+Subtotal: $16.000
 ```
 
-**Fórmula:**
+**Fórmulas:**
 ```
-subtotal = kilos_vendidos × precio_por_kg
+subtotal (kg)     = kilos_vendidos × precio_por_kg
+subtotal (unidad) = unidades_vendidas × precio_por_unidad
 ```
 
 ---
@@ -59,7 +67,12 @@ subtotal = kilos_vendidos × precio_por_kg
 ## Productos
 
 ### Unidad de venta
-Todos los productos se venden **por kilogramo**. No existen productos por unidad entera.
+Cada producto se configura como **por kilogramo** o **por unidad**. La unidad de venta no se puede cambiar al momento de la venta.
+
+| Tipo | Descripción | Ejemplos |
+|------|-------------|---------|
+| `kg` | Se vende pesado; el dueño carga los kilos manualmente | Pechuga, Carne picada, Chorizo a granel |
+| `unidad` | Se vende en piezas enteras; el dueño carga la cantidad | Pollo entero, Milanesa individual |
 
 ### Datos requeridos por producto
 
@@ -67,21 +80,25 @@ Todos los productos se venden **por kilogramo**. No existen productos por unidad
 |-------|------|-------------|
 | Nombre | texto | Ej: Pechuga, Carne picada |
 | Categoría | selección | Agrupa productos en el POS |
-| Precio por kg | decimal | Precio de venta — no modificable en la venta |
-| Costo por kg | decimal | Referencia interna de costo |
-| Stock actual | decimal (kg) | Existencias actuales |
-| Stock mínimo | decimal (kg) | Umbral de alerta |
+| Unidad de venta | `kg` / `unidad` | Define cómo se vende y cómo se controla el stock |
+| Precio de venta | decimal | Por kg o por unidad según la configuración — no modificable en la venta |
+| Costo | decimal | Referencia interna de costo (por kg o por unidad) |
+| Stock actual | decimal | En kg si es por peso; entero si es por unidad |
+| Stock mínimo | decimal | Umbral de alerta (misma unidad que stock actual) |
 | Estado | activo / inactivo | Controla visibilidad en el POS |
 
 ### Ejemplos de productos
-Pollo entero, Pechuga, Pata muslo, Alitas, Milanesa de pollo, Suprema, Carne picada, Chorizo, Morcilla
+- **Por kg:** Pechuga, Pata muslo, Alitas, Carne picada, Chorizo a granel, Morcilla
+- **Por unidad:** Pollo entero, Suprema, Milanesa de pollo
 
 ---
 
 ## Stock
 
 ### Regla principal
-El stock se controla **en kilogramos** con decimales.
+El stock se controla según la unidad de venta del producto:
+- Productos **por kg**: stock en kilogramos con decimales (ej: `1.250`)
+- Productos **por unidad**: stock en enteros sin decimales (ej: `12`)
 
 ### Movimientos que modifican stock
 
@@ -129,8 +146,8 @@ Historial de compras por proveedor visible en el detalle del proveedor.
 | Fecha | Fecha de la compra |
 | Proveedor | Selección del ABM |
 | Producto | Selección del catálogo |
-| Cantidad (kg) | Kilos comprados |
-| Costo por kg | Costo de esta compra |
+| Cantidad | Kilos comprados (producto por kg) o unidades compradas (producto por unidad) |
+| Costo unitario | Costo por kg o por unidad según el tipo del producto |
 | Total | Calculado automáticamente |
 
 ### Impacto automático al registrar una compra
@@ -157,8 +174,8 @@ Venta rápida por mostrador.
 ```
 1. Caja abierta (prerequisito)
 2. Seleccionar producto
-3. Cargar kg vendidos
-4. Sistema calcula subtotal
+3. Cargar cantidad: kg si el producto es por peso, unidades si es por unidad
+4. Sistema calcula subtotal (cantidad × precio)
 5. Agregar más productos si aplica
 6. Aplicar descuento % (opcional)
 7. Seleccionar UN medio de pago
@@ -182,7 +199,7 @@ Venta rápida por mostrador.
 - No hay recargo
 
 ### Precio
-El precio por kg es el cargado en el producto. **No se modifica al momento de la venta.**
+El precio (por kg o por unidad según el producto) es el cargado en el catálogo. **No se modifica al momento de la venta.**
 
 ### Anulación de ventas
 - Disponible desde el historial de ventas
@@ -202,7 +219,7 @@ Ticket **opcional**, no fiscal.
 | Nombre del negocio |
 | Fecha y hora |
 | Número interno de venta |
-| Productos (nombre, kg, precio por kg, subtotal) |
+| Productos (nombre, cantidad [kg o unidades], precio, subtotal) |
 | Descuento aplicado (si aplica) |
 | Total |
 | Medio de pago |
@@ -280,7 +297,21 @@ Fecha, apertura, cierre, monto inicial, total ventas, total egresos, total retir
 - Un único usuario: el dueño
 - Login con email + contraseña
 - JWT con expiración fija (sin refresh token)
-- Sin recuperación de contraseña en el MVP
+- **Recuperación de contraseña vía Google:** el sistema envía un email de reseteo usando el servicio de Google (Gmail / Google SMTP). El dueño recibe un link con token temporal, accede y establece nueva contraseña.
+
+### Flujo de recuperación de contraseña
+
+```
+1. Dueño hace click en "Olvidé mi contraseña"
+2. Ingresa su email registrado
+3. Sistema genera token de reseteo con expiración (ej: 1 hora)
+4. Sistema envía email via Google SMTP con link: /reset-password?token=xxx
+5. Dueño abre el link, ingresa nueva contraseña
+6. Sistema invalida el token y actualiza la contraseña
+7. Dueño inicia sesión normalmente
+```
+
+> El email de envío es una cuenta de Google configurada en variables de entorno. El token se almacena en base de datos con fecha de expiración.
 
 ---
 
@@ -288,7 +319,7 @@ Fecha, apertura, cierre, monto inicial, total ventas, total egresos, total retir
 
 | # | Módulo | Descripción |
 |---|--------|-------------|
-| 1 | Auth | Login, sesión JWT |
+| 1 | Auth | Login, sesión JWT, recuperación de contraseña vía Google SMTP |
 | 2 | Dashboard | KPIs del día: ventas, caja, stock bajo, últimas operaciones |
 | 3 | Productos / Stock | ABM productos, movimientos, ajustes y mermas |
 | 4 | Compras | ABM proveedores, registro de compras simples |
@@ -301,11 +332,21 @@ Fecha, apertura, cierre, monto inicial, total ventas, total egresos, total retir
 
 El sistema **no tendrá:**
 
+**Normativa fiscal y pagos:**
 - Facturación fiscal / AFIP / controlador fiscal
-- Integración con balanza o código de barras
+- Cumplimiento de normativa impositiva (no emite facturas A, B ni C)
+- Integración con Mercado Pago ni ningún gateway de cobro externo — los medios de pago (efectivo, transferencia, débito, crédito) se registran manualmente
+
+**Dispositivos externos:**
+- Integración con balanza comercial (el peso se carga manualmente)
+- Integración con lector de código de barras
+- Integración con impresora fiscal
+- Integración con cualquier otro dispositivo externo de hardware
+
+**Funcionalidades fuera de alcance:**
 - Clientes registrados o cuenta corriente
 - Combinación de múltiples medios de pago en una venta
-- Modificación de precio al momento de la venta
+- Modificación de precio al momento de la venta (ni por kg ni por unidad)
 - Reparto / delivery / mayoristas
 - Multi-sucursal
 - Gestión de empleados, sueldos, turnos
@@ -347,6 +388,7 @@ El sistema **no tendrá:**
 | Base de datos | PostgreSQL |
 | Deploy | Railway (frontend + backend + DB) |
 | Auth | JWT con expiración fija |
+| Email (recupero de contraseña) | Google SMTP via Nodemailer (App Password) |
 | Repo | Monorepo (backend + frontend en `erpPolleria/`) |
 
 ---
