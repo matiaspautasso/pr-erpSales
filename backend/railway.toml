@@ -1,0 +1,10 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install --include=dev && npm run build"
+
+[deploy]
+preDeployCommand = "npm run migration:run"
+startCommand = "node dist/main"
+healthcheckPath = "/health"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
