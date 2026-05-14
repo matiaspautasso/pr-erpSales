@@ -18,7 +18,7 @@ export class Sale {
   @Column({ type: 'varchar', length: 10, default: 'confirmed' })
   status!: 'confirmed' | 'cancelled';
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   notes!: string | null;
 
   @CreateDateColumn()

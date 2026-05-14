@@ -32,7 +32,7 @@ export class Compra {
   @Column({ type: 'date' })
   date!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   notes!: string | null;
 
   @CreateDateColumn()

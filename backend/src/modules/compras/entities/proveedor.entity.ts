@@ -8,10 +8,10 @@ export class Proveedor {
   @Column()
   name!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   phone!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   email!: string | null;
 
   @CreateDateColumn()

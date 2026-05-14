@@ -24,7 +24,7 @@ export class CashMovement {
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   amount!: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   description!: string | null;
 
   @CreateDateColumn()
