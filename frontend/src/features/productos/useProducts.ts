@@ -23,6 +23,15 @@ export interface CreateProductDto {
   min_stock: number;
 }
 
+export interface UpdateProductDto {
+  name?: string;
+  category?: string;
+  price?: number;
+  cost?: number;
+  min_stock?: number;
+  status?: 'active' | 'inactive';
+}
+
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,5 +59,10 @@ export function useProducts() {
     setProducts((prev) => [...prev, res.data]);
   }
 
-  return { products, loading, error, create, refresh: fetchProducts };
+  async function update(id: number, dto: UpdateProductDto): Promise<void> {
+    const res = await http.patch<Product>(`/api/productos/${id}`, dto);
+    setProducts((prev) => prev.map((p) => (p.id === id ? res.data : p)));
+  }
+
+  return { products, loading, error, create, update, refresh: fetchProducts };
 }

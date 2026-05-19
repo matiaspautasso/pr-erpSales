@@ -8,6 +8,7 @@ import { ResetPasswordPage } from '../features/auth/ResetPasswordPage';
 import { ProductsPage } from '../features/productos/ProductsPage';
 import { DashboardPage } from '../features/dashboard/DashboardPage';
 import { ComprasPage } from '../features/compras/ComprasPage';
+import { ProveedoresPage } from '../features/proveedores/ProveedoresPage';
 import { CajaPage } from '../features/caja/CajaPage';
 import { POSPage } from '../features/ventas/POSPage';
 
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
       {
         path: 'compras',
         element: <ComprasPage />,
+      },
+      {
+        path: 'proveedores',
+        element: <ProveedoresPage />,
       },
       {
         path: 'ventas',

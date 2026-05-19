@@ -26,20 +26,16 @@ export class DashboardService {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    const [total_productos, allProducts, currentCaja, allSales] = await Promise.all([
+    const [total_productos, activeProducts, currentCaja, todaySales] = await Promise.all([
       this.productRepo.count({ where: { status: 'active' } }),
-      this.productRepo.find(),
+      this.productRepo.find({ where: { status: 'active' } }),
       this.cajaService.getCurrent(),
-      this.salesService.findAll(),
+      this.salesService.findConfirmedSince(todayStart),
     ]);
 
-    const productos_bajo_minimo = allProducts.filter(
+    const productos_bajo_minimo = activeProducts.filter(
       (p) => Number(p.current_stock) < Number(p.min_stock),
     ).length;
-
-    const todaySales = allSales.filter(
-      (s) => s.status === 'confirmed' && new Date(s.created_at) >= todayStart,
-    );
 
     return {
       total_productos,

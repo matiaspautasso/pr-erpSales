@@ -1,13 +1,15 @@
 import { IsString, IsNotEmpty, IsOptional, IsEmail } from 'class-validator';
 
-export class CreateProveedorDto {
+export class UpdateProveedorDto {
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  name?: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  cuit!: string;
+  cuit?: string;
 
   @IsOptional()
   @IsString()

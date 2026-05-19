@@ -25,7 +25,7 @@ export class SalesService {
       throw new BadRequestException('No hay una caja abierta para registrar la venta');
     }
 
-    let total = 0;
+    let subtotalsSum = 0;
     for (const item of dto.items) {
       const product = await this.productRepo.findOne({ where: { id: item.producto_id } });
       if (!product) {
@@ -36,10 +36,20 @@ export class SalesService {
           `Stock insuficiente para el producto ${item.producto_id}: disponible ${product.current_stock}, solicitado ${item.quantity}`,
         );
       }
-      total += item.quantity * item.unit_price;
+      subtotalsSum += item.quantity * item.unit_price;
     }
 
-    const sale = await this.saleRepo.save({ total, status: 'confirmed', notes: dto.notes ?? null });
+    const discountPercent = dto.discount_percent ?? 0;
+    const total = Math.round(subtotalsSum * (1 - discountPercent / 100) * 100) / 100;
+
+    const items = dto.items.map((item) => ({
+      producto_id: item.producto_id,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      subtotal: item.quantity * item.unit_price,
+    }));
+
+    const sale = await this.saleRepo.save({ total, discount_percent: discountPercent, status: 'confirmed', payment_method: dto.payment_method, notes: dto.notes ?? null, items });
 
     for (const item of dto.items) {
       await this.stockService.registerMovement(
@@ -57,6 +67,15 @@ export class SalesService {
 
   async findAll(): Promise<Sale[]> {
     return this.saleRepo.find({ order: { created_at: 'DESC' } });
+  }
+
+  async findConfirmedSince(since: Date): Promise<Sale[]> {
+    return this.saleRepo
+      .createQueryBuilder('sale')
+      .where('sale.status = :status', { status: 'confirmed' })
+      .andWhere('sale.created_at >= :since', { since })
+      .orderBy('sale.created_at', 'DESC')
+      .getMany();
   }
 
   async cancel(id: number): Promise<Sale> {

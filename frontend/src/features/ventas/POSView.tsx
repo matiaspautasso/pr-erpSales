@@ -1,6 +1,13 @@
 import { useState } from 'react';
-import { usePOS, type SaleItem } from './usePOS';
+import { usePOS, type SaleItem, type PaymentMethod } from './usePOS';
 import { useProducts } from '../productos/useProducts';
+
+const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  cash: 'Efectivo',
+  transfer: 'Transferencia',
+  debit: 'Débito',
+  credit: 'Crédito',
+};
 
 interface CartItem extends SaleItem {
   name: string;
@@ -54,8 +61,11 @@ export function POSView() {
   const [submitting, setSubmitting] = useState(false);
   const [saleError, setSaleError] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number>(0);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('');
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
 
-  const total = cart.reduce((acc, i) => acc + i.quantity * i.unit_price, 0);
+  const subtotal = cart.reduce((acc, i) => acc + i.quantity * i.unit_price, 0);
+  const total = Math.round(subtotal * (1 - discountPercent / 100) * 100) / 100;
 
   function addToCart(productId: number) {
     const product = products.find((p) => p.id === productId);
@@ -96,14 +106,19 @@ export function POSView() {
   }
 
   async function handleConfirm() {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || !paymentMethod) return;
     setSubmitting(true);
     setSaleError(null);
     try {
       await createSale(
         cart.map(({ producto_id, quantity, unit_price }) => ({ producto_id, quantity, unit_price })),
+        undefined,
+        paymentMethod,
+        discountPercent,
       );
       setCart([]);
+      setPaymentMethod('');
+      setDiscountPercent(0);
       await refresh();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -169,11 +184,39 @@ export function POSView() {
             )}
           </div>
           <div className="px-4 py-4 border-t border-border">
+            <div className="mb-3">
+              <p className="font-body text-sm font-medium text-text-secondary mb-1">Descuento (%)</p>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                className="input w-full"
+                value={discountPercent}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  setDiscountPercent(v >= 0 && v <= 100 ? v : discountPercent);
+                }}
+              />
+            </div>
             <div className="flex items-center justify-between mb-3">
               <span className="font-body font-medium text-text-secondary">Total</span>
               <span className="font-heading text-xl font-bold text-title">
                 ${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
+            </div>
+            <div className="mb-3">
+              <p className="font-body text-sm font-medium text-text-secondary mb-1">Medio de pago</p>
+              <select
+                className="input w-full"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod | '')}
+              >
+                <option value="">Seleccioná un medio de pago</option>
+                {(Object.entries(PAYMENT_METHOD_LABELS) as [PaymentMethod, string][]).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
             </div>
             {saleError && (
               <p className="font-body text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-3">{saleError}</p>
@@ -181,7 +224,7 @@ export function POSView() {
             <button
               className="btn-primary w-full"
               onClick={handleConfirm}
-              disabled={cart.length === 0 || submitting}
+              disabled={cart.length === 0 || !paymentMethod || submitting}
             >
               {submitting ? 'Registrando...' : 'Confirmar venta'}
             </button>

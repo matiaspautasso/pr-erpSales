@@ -66,6 +66,13 @@ describe('ProductsService', () => {
       await expect(service.create(dto)).rejects.toThrow(BadRequestException);
     });
 
+    it('solo cuenta productos activos para verificar el límite de 50', async () => {
+      repo.count.mockResolvedValue(0);
+      repo.save.mockResolvedValue(makeProduct());
+      await service.create(dto);
+      expect(repo.count).toHaveBeenCalledWith({ where: { status: 'active' } });
+    });
+
     it('crea el producto cuando hay menos de 50', async () => {
       repo.count.mockResolvedValue(5);
       repo.save.mockResolvedValue(makeProduct());

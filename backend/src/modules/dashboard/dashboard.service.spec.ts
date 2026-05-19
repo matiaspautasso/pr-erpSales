@@ -9,12 +9,15 @@ describe('DashboardService', () => {
   let service: DashboardService;
   let productRepo: { count: jest.Mock; find: jest.Mock };
   let cajaService: { getCurrent: jest.Mock };
-  let salesService: { findAll: jest.Mock };
+  let salesService: { findAll: jest.Mock; findConfirmedSince: jest.Mock };
 
   beforeEach(async () => {
     productRepo = { count: jest.fn(), find: jest.fn() };
     cajaService = { getCurrent: jest.fn().mockResolvedValue(null) };
-    salesService = { findAll: jest.fn().mockResolvedValue([]) };
+    salesService = {
+      findAll: jest.fn().mockResolvedValue([]),
+      findConfirmedSince: jest.fn().mockResolvedValue([]),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,19 +78,48 @@ describe('DashboardService', () => {
     });
 
     it('retorna ventas_hoy y monto_ventas_hoy con ventas confirmadas de hoy', async () => {
-      const today = new Date().toISOString();
       productRepo.count.mockResolvedValue(0);
       productRepo.find.mockResolvedValue([]);
-      salesService.findAll.mockResolvedValue([
-        { id: 1, total: '500.00', status: 'confirmed', created_at: today },
-        { id: 2, total: '300.00', status: 'confirmed', created_at: today },
-        { id: 3, total: '200.00', status: 'cancelled', created_at: today },
+      salesService.findConfirmedSince.mockResolvedValue([
+        { id: 1, total: '500.00' },
+        { id: 2, total: '300.00' },
       ]);
 
       const result = await service.getKPIs();
 
       expect(result.ventas_hoy).toBe(2);
       expect(result.monto_ventas_hoy).toBe(800);
+    });
+
+    it('usa findConfirmedSince en lugar de findAll para obtener ventas del día', async () => {
+      productRepo.count.mockResolvedValue(0);
+      productRepo.find.mockResolvedValue([]);
+      salesService.findConfirmedSince.mockResolvedValue([
+        { id: 1, total: '500.00' },
+        { id: 2, total: '300.00' },
+      ]);
+
+      const result = await service.getKPIs();
+
+      expect(salesService.findAll).not.toHaveBeenCalled();
+      expect(salesService.findConfirmedSince).toHaveBeenCalledWith(expect.any(Date));
+      expect(result.ventas_hoy).toBe(2);
+      expect(result.monto_ventas_hoy).toBe(800);
+    });
+
+    it('productos_bajo_minimo no cuenta productos inactivos', async () => {
+      productRepo.count.mockResolvedValue(0);
+      // El repo devuelve solo activos (simula que la BD aplicó el filtro status=active)
+      productRepo.find.mockResolvedValue([
+        { id: 1, current_stock: 1, min_stock: 3, status: 'active' },
+      ]);
+
+      const result = await service.getKPIs();
+
+      expect(productRepo.find).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ status: 'active' }) }),
+      );
+      expect(result.productos_bajo_minimo).toBe(1);
     });
   });
 });
