@@ -2,6 +2,17 @@
 
 ERP web para gestión de stock, compras, ventas y caja de una pollería/carnicería.
 
+## Estado de producción
+
+| Servicio | URL | Estado |
+|---|---|---|
+| Frontend | https://front-production-bc79.up.railway.app | ● Online |
+| Backend (API) | https://backend-production-b3edd.up.railway.app/api | ● Online |
+| Healthcheck | https://backend-production-b3edd.up.railway.app/api/health | 200 OK |
+| Postgres | `yamabiko.proxy.rlwy.net` (interno) | ● Online |
+
+Última verificación: 2026-05-20. Deploy disparado por push a `main`.
+
 ## Stack
 
 | Capa | Tecnología |

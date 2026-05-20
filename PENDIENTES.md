@@ -7,11 +7,9 @@ Estado por módulo en [`README.md`](README.md#módulos).
 independiente final: backend 80 tests PASS / typecheck OK, frontend 52 tests
 PASS / typecheck OK, sin regresiones.
 
-> ⚠️ Pendiente operativo: ejecutar `npm run migration:run` antes de desplegar.
-> Migraciones sin correr:
-> - `1747094400010-AddPaymentMethodToSales.ts`
-> - `1747094400011-AddCuitAndObservacionesToProveedores.ts`
-> - `1747094400030-AddDiscountToSales.ts`
+**Deploy Railway operativo (2026-05-20)** — front, backend y Postgres ● Online.
+Migraciones corren automáticamente vía `preDeployCommand`. URLs en
+[`README.md`](README.md#estado-de-producción).
 
 ---
 
