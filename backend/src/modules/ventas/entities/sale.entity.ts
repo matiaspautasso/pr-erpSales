@@ -18,6 +18,12 @@ export class Sale {
   @Column({ type: 'varchar', length: 10, default: 'confirmed' })
   status!: 'confirmed' | 'cancelled';
 
+  @Column({ type: 'varchar', length: 10 })
+  payment_method!: 'cash' | 'transfer' | 'debit' | 'credit';
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
+  discount_percent!: number;
+
   @Column({ type: 'varchar', nullable: true })
   notes!: string | null;
 

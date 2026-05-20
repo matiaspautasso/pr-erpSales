@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { CajaService } from './caja.service';
-import { IsNumber, IsPositive, IsOptional, IsString, IsIn } from 'class-validator';
+import { IsNumber, IsPositive, IsOptional, IsString, IsIn, Min } from 'class-validator';
 import { type CashMovementType } from './entities/cash-movement.entity';
 
 class OpenCajaDto {
@@ -11,7 +11,7 @@ class OpenCajaDto {
 
 class CloseCajaDto {
   @IsNumber()
-  @IsPositive()
+  @Min(0)
   real_amount!: number;
 }
 
@@ -45,6 +45,16 @@ export class CajaController {
   @Get('current')
   getCurrent() {
     return this.cajaService.getCurrent();
+  }
+
+  @Get('current/movements')
+  getCurrentMovements() {
+    return this.cajaService.getCurrentMovements();
+  }
+
+  @Get('current/summary')
+  getCloseSummary() {
+    return this.cajaService.getCloseSummary();
   }
 
   @Get('history')

@@ -116,12 +116,16 @@ npm run test:e2e
 
 ## Módulos
 
-| Módulo | Estado | Change SDD |
-|--------|--------|------------|
-| Setup / Infraestructura | ✅ Completo | `setup-monorepo` |
-| Auth (login) | Pendiente | `auth` |
-| Productos / Stock | Pendiente | `modulo-stock` |
-| Compras | Pendiente | `modulo-compras` |
-| Ventas / POS | Pendiente | `modulo-ventas` |
-| Caja | Pendiente | `modulo-caja` |
-| Dashboard | Pendiente | `dashboard` |
+Estado real verificado contra el código (2026-05-19). Prioridad 1, 2 y 3 de
+[`PENDIENTES.md`](PENDIENTES.md) resueltas con TDD (backend 80 tests, frontend
+52 tests, todo verde). Solo quedan ítems de Prioridad 4 (deuda técnica/cobertura).
+
+| Módulo | Estado | Cobertura spec |
+|--------|--------|----------------|
+| Setup / Infraestructura | ✅ Completo | — |
+| Auth (login + reset password) | ✅ Completo | ~90% |
+| Dashboard | ✅ Completo | ~90% |
+| Productos / Stock | ✅ Completo | ~95% |
+| Ventas / POS | ✅ Completo | ~95% |
+| Caja | ✅ Completo | ~95% |
+| Compras / Proveedores | ✅ Completo | ~90% |

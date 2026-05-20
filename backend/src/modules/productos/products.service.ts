@@ -13,7 +13,7 @@ export class ProductsService {
   ) {}
 
   async create(dto: CreateProductDto): Promise<Product> {
-    const count = await this.repo.count();
+    const count = await this.repo.count({ where: { status: 'active' } });
     if (count >= 50) {
       throw new BadRequestException('El sistema no permite más de 50 productos');
     }
