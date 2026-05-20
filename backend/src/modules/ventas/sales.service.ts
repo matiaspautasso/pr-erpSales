@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Sale } from './entities/sale.entity';
@@ -16,6 +16,7 @@ export class SalesService {
     @InjectRepository(Product)
     private readonly productRepo: Repository<Product>,
     private readonly stockService: StockService,
+    @Inject(forwardRef(() => CajaService))
     private readonly cajaService: CajaService,
   ) {}
 
